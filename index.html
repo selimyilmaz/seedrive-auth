@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  SeeDRIVE OAuth yönlendirme sayfası (GitHub Pages'te barındırılır).
+  Google girişten sonra telefonu buraya gönderir; sayfa, `state` içindeki TV adresine
+  (yalnızca özel ağ IPv4) yönlendirip yetkilendirme kodunu TV'ye ulaştırır.
+  Kod tek başına işe yaramaz: PKCE doğrulayıcısı ve istemci sırrı yalnızca TV'dedir.
+-->
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>SeeDRIVE · Giriş</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #06070B; color: #F4F5F9;
+           font: 16px/1.5 system-ui, -apple-system, sans-serif; }
+    main { max-width: 420px; padding: 32px 24px; text-align: center; }
+    b { display: block; font-size: 13px; letter-spacing: .2em; color: #5EEAD4; margin-bottom: 20px; }
+    h1 { font-size: 22px; margin: 0 0 12px; }
+    p { color: #A2A8BA; margin: 0 0 24px; }
+    a { display: inline-block; padding: 12px 24px; border-radius: 24px; background: #5EEAD4; color: #06070B;
+        font-weight: 700; text-decoration: none; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <b>SEEDRIVE</b>
+    <h1 id="title">TV'ye bağlanılıyor…</h1>
+    <p id="msg">Telefonun TV ile aynı Wi-Fi ağında olmalı.</p>
+    <a id="go" hidden>TV'ye devam et</a>
+  </main>
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var parts = (q.get('state') || '').split(':');
+      var ip = parts[0], port = parts[1], nonce = parts[2];
+      var o = (ip || '').split('.').map(Number);
+      var privateIp = o.length === 4 && o.every(function (n) { return n >= 0 && n <= 255; }) &&
+        (o[0] === 10 || (o[0] === 172 && o[1] >= 16 && o[1] < 32) || (o[0] === 192 && o[1] === 168));
+      if (parts.length !== 3 || !privateIp || !/^\d{1,5}$/.test(port) || !/^[0-9a-f]{32}$/.test(nonce)) {
+        document.getElementById('title').textContent = 'Geçersiz bağlantı';
+        document.getElementById('msg').textContent = "Bu sayfa SeeDRIVE girişi içindir. TV'deki QR kodunu okutarak başlayın.";
+        return;
+      }
+      var target = 'http://' + ip + ':' + port + '/cb' + location.search;
+      var go = document.getElementById('go');
+      go.href = target;
+      go.hidden = false;
+      // Kodun tarayıcı geçmişinde kalmaması için yerinde değiştir.
+      location.replace(target);
+    })();
+  </script>
+</body>
+</html>
