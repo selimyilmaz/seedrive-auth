@@ -20,6 +20,7 @@
     p { color: #A2A8BA; margin: 0 0 24px; }
     a { display: inline-block; padding: 12px 24px; border-radius: 24px; background: #5EEAD4; color: #06070B;
         font-weight: 700; text-decoration: none; }
+    a.link { padding: 0; background: none; color: #5EEAD4; font-weight: 600; text-decoration: underline; }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -29,10 +30,20 @@
     <h1 id="title">TV'ye bağlanılıyor…</h1>
     <p id="msg">Telefonun TV ile aynı Wi-Fi ağında olmalı.</p>
     <a id="go" hidden>TV'ye devam et</a>
+    <p id="home" hidden><a class="link" href="privacy.html">Gizlilik Politikası</a></p>
   </main>
   <script>
     (function () {
       var q = new URLSearchParams(location.search);
+      if (!q.has('state') && !q.has('code') && !q.has('error')) {
+        // Doğrudan ziyaret: uygulamanın ana sayfası.
+        document.getElementById('title').textContent = 'Google Drive’ın, büyük ekranda.';
+        document.getElementById('msg').textContent = 'SeeDRIVE, Google Drive’daki filmlerini, müziklerini ve fotoğraflarını ' +
+          'Android TV’de oynatan bir medya merkezidir. Drive’a yalnızca okuma izniyle erişir. Bu sayfa, TV’de ' +
+          'telefonla giriş yaparken kullanılan yönlendirme sayfasıdır.';
+        document.getElementById('home').hidden = false;
+        return;
+      }
       var parts = (q.get('state') || '').split(':');
       var ip = parts[0], port = parts[1], nonce = parts[2];
       var o = (ip || '').split('.').map(Number);
